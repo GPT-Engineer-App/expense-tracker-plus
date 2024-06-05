@@ -1,0 +1,62 @@
+<?php
+session_start();
+include('db.php');
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: index.php');
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $descricao = $_POST['descricao'];
+    $valor = $_POST['valor'];
+    $data = $_POST['data'];
+    $categoria_nome = $_POST['categoria_nome'];
+    $conta_id = $_POST['conta_id'];
+
+    $query = "INSERT INTO transacao (descricao, valor, data, tipo, conta_id, categoria_nome) VALUES ('$descricao', '$valor', '$data', 'gasto', '$conta_id', '$categoria_nome')";
+    mysqli_query($conn, $query);
+    header('Location: gastos.php');
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financeiro - Add Gasto</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Add New Gasto</h1>
+        <form method="POST">
+            <input type="text" name="descricao" placeholder="Descrição" required>
+            <input type="number" name="valor" placeholder="Valor" required>
+            <input type="date" name="data" required>
+            <select name="categoria_nome" required>
+                <!-- Add options dynamically from the database -->
+                <?php
+                $query = "SELECT nome FROM categoria";
+                $result = mysqli_query($conn, $query);
+                while ($row = mysqli_fetch_assoc($result)) {
+                    echo "<option value='{$row['nome']}'>{$row['nome']}</option>";
+                }
+                ?>
+            </select>
+            <select name="conta_id" required>
+                <!-- Add options dynamically from the database -->
+                <?php
+                $query = "SELECT id FROM conta WHERE usuario_id='$user_id'";
+                $result = mysqli_query($conn, $query);
+                while ($row = mysqli_fetch_assoc($result)) {
+                    echo "<option value='{$row['id']}'>Conta {$row['id']}</option>";
+                }
+                ?>
+            </select>
+            <button type="submit">Add Gasto</button>
+        </form>
+    </div>
+</body>
+</html>
